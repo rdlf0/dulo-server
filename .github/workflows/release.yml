@@ -1,8 +1,7 @@
 name: Release
 
+# Runs only by hand, so several merged changes can go out in one release.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       version_type:
@@ -23,7 +22,6 @@ concurrency:
 permissions:
   contents: write
   packages: write
-  pull-requests: read
   id-token: write
   attestations: write
 
@@ -33,7 +31,9 @@ env:
 jobs:
   release:
     name: Release
-    runs-on: ubuntu-latest
+    # Releases are cut from main only.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-26.04
 
     steps:
       # RELEASE_TOKEN must be allowed to push to the protected main branch
@@ -51,60 +51,21 @@ jobs:
           java-version: '25'
           cache: maven
 
-      - name: Determine version type
+      - name: Determine version policy
         id: version_type
-        uses: actions/github-script@v9
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const policies = {
-              major: 'SemVerMajorRelease',
-              minor: 'SemVerMinorRelease',
-              // Releases the current snapshot version as is, e.g. 1.2.3-SNAPSHOT -> 1.2.3.
-              patch: 'SemVerPatchDevelopment'
-            };
-
-            let versionType = context.payload.inputs?.version_type;
-            if (!versionType) {
-              const labelMap = {
-                "release: major": "major",
-                "release: minor": "minor",
-                "release: patch": "patch"
-              };
-              const query = `
-                query($owner:String!, $repo:String!, $sha:GitObjectID!) {
-                  repository(owner:$owner, name:$repo) {
-                    object(oid:$sha) {
-                      ... on Commit {
-                        associatedPullRequests(first: 1) {
-                          nodes {
-                            number
-                            labels(first: 100) { nodes { name } }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              `;
-              const {owner, repo} = context.repo;
-              const data = await github.graphql(query, { owner, repo, sha: context.sha });
-              const prs = data?.repository?.object?.associatedPullRequests?.nodes ?? [];
-              if (prs.length === 0) {
-                core.setFailed(`No PR found for commit ${context.sha}. Use the manual workflow run instead.`);
-                return;
-              }
-              const labels = prs[0].labels.nodes.map(n => n.name);
-              versionType = Object.entries(labelMap).find(([label]) => labels.includes(label))?.[1];
-              if (!versionType) {
-                core.setFailed(`PR #${prs[0].number} has no release label.`);
-                return;
-              }
-            }
-
-            core.info(`Release type: ${versionType} (${policies[versionType]})`);
-            core.setOutput('version_type', versionType);
-            core.setOutput('policy', policies[versionType]);
+        env:
+          VERSION_TYPE: ${{ inputs.version_type }}
+        run: |
+          case "$VERSION_TYPE" in
+            major) policy=SemVerMajorRelease ;;
+            minor) policy=SemVerMinorRelease ;;
+            # Releases the current snapshot version as is, e.g. 1.2.3-SNAPSHOT -> 1.2.3.
+            patch) policy=SemVerPatchDevelopment ;;
+            *) echo "Unknown version type: $VERSION_TYPE"; exit 1 ;;
+          esac
+          echo "Release type: $VERSION_TYPE ($policy)"
+          echo "version_type=$VERSION_TYPE" >> $GITHUB_OUTPUT
+          echo "policy=$policy" >> $GITHUB_OUTPUT
 
       # Signs the release commits and tags. The git user name and email come from the key.
       - name: Import GPG key

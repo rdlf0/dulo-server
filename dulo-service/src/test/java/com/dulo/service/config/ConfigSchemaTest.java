@@ -83,8 +83,8 @@ class ConfigSchemaTest {
                     return doc == null ? null : doc.value();
                 })
                 .withRequiredCheck(field ->
-                        field.getAnnotation(NotBlank.class) != null
-                                || field.getAnnotation(NotNull.class) != null)
+                        field.getRawMember().isAnnotationPresent(NotBlank.class)
+                                || field.getRawMember().isAnnotationPresent(NotNull.class))
                 .withDefaultResolver(ConfigSchemaTest::defaultValue);
 
         final ObjectNode schema =

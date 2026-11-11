@@ -8,6 +8,5 @@
 
 ## Checklist
 
-- [ ] Exactly one release label: `release: major`, `release: minor` or `release: patch`
 - [ ] Tests added or updated
 - [ ] `./mvnw verify` passes locally

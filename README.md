@@ -27,8 +27,8 @@ are masked.
 
 More examples in [`deploy/compose/`](deploy/compose): SQLite, PostgreSQL, and Pocket ID.
 
-Images are published for `linux/amd64` and `linux/arm64`, so they run on a Raspberry Pi with a
-64-bit OS.
+Images are published for `linux/amd64` and `linux/arm64`, so they also run on ARM machines such
+as a Raspberry Pi with a 64-bit OS.
 
 ## Configuration
 

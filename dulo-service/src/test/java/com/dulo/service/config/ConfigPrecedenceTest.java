@@ -52,7 +52,7 @@ class ConfigPrecedenceTest {
                     url: jdbc:postgresql://from-file:5432/dulo
                 """);
 
-        try (var context =
+        try (final var context =
                 start(
                         Map.of(
                                 "DULO_CONFIG_FILE",
@@ -75,7 +75,7 @@ class ConfigPrecedenceTest {
 
     @Test
     void sqliteInDataDirIsTheDefaultDatabase() {
-        try (var context =
+        try (final var context =
                 start(
                         Map.of(
                                 "DULO_CONFIG_FILE",
@@ -94,7 +94,7 @@ class ConfigPrecedenceTest {
         final Path example =
                 Path.of("..", "deploy", "dulo.example.yaml").toAbsolutePath().normalize();
 
-        try (var context = start(Map.of("DULO_CONFIG_FILE", example.toString()))) {
+        try (final var context = start(Map.of("DULO_CONFIG_FILE", example.toString()))) {
             final DuloProperties properties = context.getBean(DuloProperties.class);
 
             assertThat(properties.identity().providers()).isNotEmpty();

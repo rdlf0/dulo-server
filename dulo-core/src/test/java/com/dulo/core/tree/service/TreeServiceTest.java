@@ -10,6 +10,7 @@ import com.dulo.domain.feature.FeatureOverrides;
 import com.dulo.domain.feature.FeatureState;
 import com.dulo.domain.tree.TreeSettings;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -55,11 +56,11 @@ class TreeServiceTest {
         assertThat(view.features()).contains(new FeatureState(Feature.MAP_VIEW, false, true));
     }
 
-    private record InMemoryTrees(TreeSettings tree) implements TreeSettingsRepository {
+    private record InMemoryTrees(@Nullable TreeSettings tree) implements TreeSettingsRepository {
 
         @Override
         public Optional<TreeSettings> find() {
-            return Optional.ofNullable(tree);
+            return Optional.ofNullable(this.tree);
         }
 
         @Override

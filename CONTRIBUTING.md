@@ -7,17 +7,18 @@
    - `feat/<short-name>` for features
    - `fix/<short-name>` for bug fixes
    - `chore/<short-name>` for build, CI and dependency changes
-3. Open a pull request and add **exactly one** release label:
-   - `release: major`: breaking change
-   - `release: minor`: new feature
-   - `release: patch`: bug fix or internal change
+3. Open a pull request.
 4. Pull requests are squash-merged once checks pass and the PR is approved.
 
 ## Versioning and releases
 
-Dulo follows [semantic versioning](https://semver.org). Every merge to `main` produces a release:
+Dulo follows [semantic versioning](https://semver.org). Releases are started by hand, so one
+release can bundle several merged pull requests:
 
-1. The **Release** workflow reads the merged PR's label.
+1. In the Actions tab, open **Release** → **Run workflow** on `main` and pick the version type:
+   - `major`: breaking changes
+   - `minor`: new features
+   - `patch`: bug fixes and internal changes only
 2. `maven-release-plugin` sets the version using the matching policy (`SemVerMajorRelease`,
    `SemVerMinorRelease` or `SemVerPatchDevelopment`), creates a signed `vX.Y.Z` tag and commits the
    next `-SNAPSHOT` version. These commits are marked `[skip ci]`.
@@ -25,12 +26,10 @@ Dulo follows [semantic versioning](https://semver.org). Every merge to `main` pr
    `X.Y.Z`, `X.Y`, `X` and `latest`.
 4. A GitHub release is created with the JAR and the config JSON Schema attached.
 
-A release can also be started by hand from the Actions tab (**Release** → **Run workflow**).
-
 ### Repository setup
 
-- **Branch protection on `main`:** require a pull request, require the `CI`, `Docker image` and
-  `Validate Labels` checks, and block direct pushes.
+- **Branch protection on `main`:** require a pull request, require the `CI` and `Docker image`
+  checks, and block direct pushes.
 - **Secrets used by the Release workflow:**
   - `RELEASE_TOKEN`: a GitHub App token or personal access token that may push to the protected
     `main` branch (it pushes the version commit and tag).
@@ -60,7 +59,6 @@ A release can also be started by hand from the Actions tab (**Release** → **Ru
   between version properties, so a Dependabot update changes one line.
 - Declare every dependency the code uses directly. `maven-dependency-plugin` fails the build on
   used but undeclared and on declared but unused dependencies.
-- Use American English.
 - Keep the architecture rules green (`ArchitectureTest`): `dulo-domain` and `dulo-core` must
   not depend on frameworks, and adapters must not depend on each other.
 
