@@ -1,0 +1,16 @@
+*.iml
+.DS_Store
+.vscode/
+data/
+pom.xml.next
+pom.xml.releaseBackup
+pom.xml.tag
+release.properties
+target/
+
+# IntelliJ: share code style, inspections and required plugins; ignore personal settings.
+.idea/*
+!.idea/codeStyles/
+!.idea/externalDependencies.xml
+!.idea/google-java-format.xml
+!.idea/inspectionProfiles/

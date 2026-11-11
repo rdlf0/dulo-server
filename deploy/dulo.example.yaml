@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/rdlf0/dulo-server/main/schema/dulo-config.schema.json
+#
+# Example Dulo configuration. Mount it at /config/dulo.yaml (or point DULO_CONFIG_FILE to it).
+# Every value can also be set with an environment variable, which takes precedence:
+#   dulo.database.url                         -> DULO_DATABASE_URL
+#   dulo.identity.providers.pocketid.client-id -> DULO_IDENTITY_PROVIDERS_POCKETID_CLIENTID
+#   dulo.features.map-view                    -> DULO_FEATURES_MAP_VIEW
+dulo:
+  public-url: https://tree.example.com
+
+  # Leave out to use SQLite in the data directory.
+  database:
+    url: jdbc:postgresql://db:5432/dulo
+    username: dulo
+    password: change-me
+
+  identity:
+    providers:
+      pocketid:
+        type: oidc
+        display-name: Pocket ID
+        issuer-uri: https://id.example.com
+        client-id: dulo
+        client-secret: change-me
+        claims:
+          roles: groups
+        role-mappings:
+          family-admins: [admin]
+          family: [editor]
+        default-role: viewer
+      google:
+        type: google
+        display-name: Google
+        client-id: 1234567890-abc.apps.googleusercontent.com
+        client-secret: change-me
+        default-role: viewer
+
+  clients:
+    web:
+      redirect-uris:
+        - https://tree.example.com/auth/callback
+      allowed-origins:
+        - https://tree.example.com
+
+  registration:
+    mode: approval
+
+  # Forced feature states. Features left out are managed in the administration page.
+  features:
+    timeline: true
+    audit-log: false

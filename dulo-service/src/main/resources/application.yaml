@@ -1,0 +1,48 @@
+# Built-in defaults. Override them with a YAML file (DULO_CONFIG_FILE, default
+# /config/dulo.yaml) or environment variables (highest precedence).
+spring:
+  application:
+    name: dulo-server
+  config:
+    import: optional:file:${DULO_CONFIG_FILE:/config/dulo.yaml}
+  datasource:
+    url: ${dulo.database.url}
+    username: ${dulo.database.username:}
+    password: ${dulo.database.password:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+  mvc:
+    problemdetails:
+      enabled: true
+  threads:
+    virtual:
+      enabled: true
+  main:
+    banner-mode: off
+
+server:
+  port: 8080
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    path: /api/v1/openapi.json
+
+dulo:
+  data-dir: ./data
+  database:
+    url: jdbc:sqlite:${dulo.data-dir}/dulo.db
