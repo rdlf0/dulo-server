@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0001-tree-settings
+      author: dulo
+      changes:
+        - createTable:
+            tableName: tree_settings
+            columns:
+              - column:
+                  name: id
+                  type: varchar(36)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_tree_settings
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(2000)
+              - column:
+                  name: version
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: tree_feature
+            columns:
+              - column:
+                  name: tree_id
+                  type: varchar(36)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_tree_feature
+                    nullable: false
+                    foreignKeyName: fk_tree_feature_tree
+                    references: tree_settings(id)
+                    deleteCascade: true
+              - column:
+                  name: feature
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_tree_feature
+                    nullable: false

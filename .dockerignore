@@ -1,0 +1,9 @@
+**/target/
+.git/
+.github/
+.idea/
+.vscode/
+*.iml
+data/
+deploy/
+schema/

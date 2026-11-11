@@ -1,0 +1,225 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "Provider" : {
+      "type" : "object",
+      "properties" : {
+        "claims" : {
+          "type" : "object",
+          "properties" : {
+            "email" : {
+              "type" : "string",
+              "description" : "Claim holding the email address."
+            },
+            "name" : {
+              "type" : "string",
+              "description" : "Claim holding the display name."
+            },
+            "roles" : {
+              "type" : "string",
+              "description" : "Claim holding the user's groups or roles."
+            }
+          },
+          "additionalProperties" : false,
+          "description" : "Names of the claims Dulo reads from the provider's ID token."
+        },
+        "client-id" : {
+          "type" : "string",
+          "description" : "OAuth2 client id registered with the provider."
+        },
+        "client-secret" : {
+          "type" : "string",
+          "description" : "OAuth2 client secret registered with the provider."
+        },
+        "default-role" : {
+          "type" : "string",
+          "description" : "Dulo role for users whose claims match no role mapping."
+        },
+        "display-name" : {
+          "type" : "string",
+          "description" : "Name shown on the sign-in page."
+        },
+        "issuer-uri" : {
+          "$ref" : "#/$defs/URI",
+          "description" : "OIDC issuer URL. Required for oidc and microsoft, e.g. https://login.microsoftonline.com/<tenant>/v2.0."
+        },
+        "role-mappings" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "description" : "Maps values of the roles claim to Dulo roles, e.g. {dulo-admins: [admin]}."
+          },
+          "description" : "Maps values of the roles claim to Dulo roles, e.g. {dulo-admins: [admin]}."
+        },
+        "scopes" : {
+          "description" : "Requested scopes.",
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "description" : "Requested scopes."
+          }
+        },
+        "type" : {
+          "type" : "string",
+          "enum" : [ "oidc", "google", "microsoft" ],
+          "description" : "Provider type."
+        }
+      },
+      "required" : [ "client-id", "type" ],
+      "additionalProperties" : false
+    },
+    "URI" : {
+      "type" : "string"
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "dulo" : {
+      "type" : "object",
+      "properties" : {
+        "clients" : {
+          "type" : "object",
+          "properties" : {
+            "web" : {
+              "type" : "object",
+              "properties" : {
+                "allowed-origins" : {
+                  "description" : "Origins allowed to call the API from a browser (CORS).",
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string",
+                    "description" : "Origins allowed to call the API from a browser (CORS)."
+                  }
+                },
+                "client-id" : {
+                  "type" : "string",
+                  "description" : "OAuth2 client id of the web client."
+                },
+                "redirect-uris" : {
+                  "description" : "Allowed redirect URIs after sign-in.",
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/$defs/URI",
+                    "description" : "Allowed redirect URIs after sign-in."
+                  }
+                }
+              },
+              "additionalProperties" : false,
+              "description" : "The Dulo web client."
+            }
+          },
+          "additionalProperties" : false,
+          "description" : "OAuth2 clients allowed to call the API."
+        },
+        "data-dir" : {
+          "type" : "string",
+          "description" : "Directory for local data such as the SQLite database."
+        },
+        "database" : {
+          "type" : "object",
+          "properties" : {
+            "password" : {
+              "type" : "string",
+              "description" : "Database password. Not used by SQLite."
+            },
+            "url" : {
+              "type" : "string",
+              "description" : "JDBC URL. Defaults to a SQLite file in the data directory. Examples: jdbc:postgresql://db:5432/dulo, jdbc:mysql://db:3306/dulo, jdbc:mariadb://db:3306/dulo."
+            },
+            "username" : {
+              "type" : "string",
+              "description" : "Database user. Not used by SQLite."
+            }
+          },
+          "required" : [ "url" ],
+          "additionalProperties" : false,
+          "description" : "Database connection."
+        },
+        "features" : {
+          "type" : "object",
+          "description" : "Forces features on (true) or off (false). Forced features are locked in the administration page. Features left out are managed by the administrator.",
+          "properties" : {
+            "people" : {
+              "type" : "boolean"
+            },
+            "families" : {
+              "type" : "boolean"
+            },
+            "events" : {
+              "type" : "boolean"
+            },
+            "places" : {
+              "type" : "boolean"
+            },
+            "tree-view" : {
+              "type" : "boolean"
+            },
+            "map-view" : {
+              "type" : "boolean"
+            },
+            "timeline" : {
+              "type" : "boolean"
+            },
+            "audit-log" : {
+              "type" : "boolean"
+            }
+          },
+          "additionalProperties" : false
+        },
+        "identity" : {
+          "type" : "object",
+          "properties" : {
+            "providers" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "$ref" : "#/$defs/Provider",
+                "description" : "Identity providers keyed by a short id of lowercase letters and digits, e.g. google or pocketid. The id is part of the environment variable names, e.g. DULO_IDENTITY_PROVIDERS_GOOGLE_CLIENTID."
+              },
+              "description" : "Identity providers keyed by a short id of lowercase letters and digits, e.g. google or pocketid. The id is part of the environment variable names, e.g. DULO_IDENTITY_PROVIDERS_GOOGLE_CLIENTID."
+            }
+          },
+          "additionalProperties" : false,
+          "description" : "Identity providers that users sign in with."
+        },
+        "print-config" : {
+          "type" : "boolean",
+          "description" : "Print the merged configuration on every start, not only before setup."
+        },
+        "public-url" : {
+          "$ref" : "#/$defs/URI",
+          "description" : "Public base URL of the server, used in redirects and issued tokens."
+        },
+        "registration" : {
+          "type" : "object",
+          "properties" : {
+            "mode" : {
+              "type" : "string",
+              "enum" : [ "auto", "approval" ],
+              "description" : "auto: new users get access right away. approval: an administrator must approve them first."
+            }
+          },
+          "additionalProperties" : false,
+          "description" : "What happens when an unknown user signs in for the first time."
+        },
+        "setup" : {
+          "type" : "object",
+          "properties" : {
+            "token" : {
+              "type" : "string",
+              "description" : "One-time token that authorizes the initial setup. Generated and printed on start when not set."
+            }
+          },
+          "additionalProperties" : false,
+          "description" : "Initial setup."
+        }
+      },
+      "additionalProperties" : false,
+      "description" : "Dulo settings."
+    }
+  },
+  "$id" : "https://raw.githubusercontent.com/rdlf0/dulo-server/main/schema/dulo-config.schema.json",
+  "title" : "Dulo server configuration"
+}

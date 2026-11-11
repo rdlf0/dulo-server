@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>4.1.2</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.dulo</groupId>
+  <artifactId>dulo-server</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Dulo Server</name>
+  <description>Self-hosted family tree server</description>
+  <url>https://github.com/rdlf0/dulo-server</url>
+
+  <modules>
+    <module>dulo-adapter-persistence-jpa</module>
+    <module>dulo-adapter-rest</module>
+    <module>dulo-core</module>
+    <module>dulo-domain</module>
+    <module>dulo-service</module>
+  </modules>
+
+  <scm>
+    <connection>scm:git:https://github.com/rdlf0/dulo-server.git</connection>
+    <developerConnection>scm:git:https://github.com/rdlf0/dulo-server.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://github.com/rdlf0/dulo-server</url>
+  </scm>
+
+  <properties>
+    <java.version>25</java.version>
+    <maven.compiler.release>${java.version}</maven.compiler.release>
+    <encoding>UTF-8</encoding>
+    <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
+    <!-- Version policy for maven-release-plugin. Can be changed by passing -DreleaseType -->
+    <releaseType>SemVerMinorRelease</releaseType>
+
+    <!-- Dependency versions -->
+    <archunit.version>1.5.1</archunit.version>
+
+    <commons-collections4.version>4.6.0</commons-collections4.version>
+
+    <commons-text.version>1.15.0</commons-text.version>
+
+    <networknt-schema.version>3.0.9</networknt-schema.version>
+
+    <springdoc.version>3.2.0</springdoc.version>
+
+    <victools-jsonschema.version>5.0.0</victools-jsonschema.version>
+
+    <!-- Plugin versions -->
+    <fmt-maven-plugin.version>2.29</fmt-maven-plugin.version>
+
+    <!-- google-java-format used by fmt-maven-plugin. Keep in sync with the IntelliJ plugin. -->
+    <google-java-format.version>2.0.0</google-java-format.version>
+
+    <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
+
+    <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
+
+    <maven-enforcer-plugin.version>3.7.0</maven-enforcer-plugin.version>
+
+    <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Internal dependencies -->
+      <dependency>
+        <groupId>com.dulo</groupId>
+        <artifactId>dulo-adapter-persistence-jpa</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.dulo</groupId>
+        <artifactId>dulo-adapter-rest</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.dulo</groupId>
+        <artifactId>dulo-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.dulo</groupId>
+        <artifactId>dulo-domain</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- 3rd party dependencies -->
+      <dependency>
+        <groupId>com.github.victools</groupId>
+        <artifactId>jsonschema-generator</artifactId>
+        <version>${victools-jsonschema.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.networknt</groupId>
+        <artifactId>json-schema-validator</artifactId>
+        <version>${networknt-schema.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-collections4</artifactId>
+        <version>${commons-collections4.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-text</artifactId>
+        <version>${commons-text.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+        <version>${springdoc.version}</version>
+      </dependency>
+
+      <!-- Test dependencies -->
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit</artifactId>
+        <version>${archunit.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit-junit5-api</artifactId>
+        <version>${archunit.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit-junit5-engine</artifactId>
+        <version>${archunit.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!-- 3rd party dependencies every module uses -->
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+    </dependency>
+
+    <!-- Test dependencies every module uses -->
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.spotify.fmt</groupId>
+          <artifactId>fmt-maven-plugin</artifactId>
+          <version>${fmt-maven-plugin.version}</version>
+          <configuration>
+            <style>aosp</style>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>com.google.googlejavaformat</groupId>
+              <artifactId>google-java-format</artifactId>
+              <version>${google-java-format.version}</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>check-format</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${maven-dependency-plugin.version}</version>
+          <configuration>
+            <failOnWarning>true</failOnWarning>
+            <ignoreUnusedRuntime>true</ignoreUnusedRuntime>
+            <!--
+              Used without a compile-time reference, so the bytecode analysis cannot see them:
+              starters (auto-configuration), annotation processors, test engines and the test
+              libraries every module inherits, including modules without tests yet.
+            -->
+            <ignoredUnusedDeclaredDependencies>
+              <dep>com.tngtech.archunit:archunit-junit5-engine</dep>
+              <dep>org.assertj:assertj-core</dep>
+              <dep>org.junit.jupiter:junit-jupiter-api</dep>
+              <dep>org.junit.jupiter:junit-jupiter-engine</dep>
+              <dep>org.junit.platform:junit-platform-launcher</dep>
+              <dep>org.springdoc:springdoc-openapi-starter-*</dep>
+              <dep>org.springframework.boot:spring-boot-configuration-processor</dep>
+              <dep>org.springframework.boot:spring-boot-starter-*</dep>
+            </ignoredUnusedDeclaredDependencies>
+          </configuration>
+          <executions>
+            <execution>
+              <id>analyze</id>
+              <goals>
+                <goal>analyze-only</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${maven-enforcer-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>enforce</id>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <banDuplicatePomDependencyVersions/>
+                  <banDynamicVersions>
+                    <ignores>
+                      <dep>${project.groupId}:*</dep>
+                    </ignores>
+                    <verbose>true</verbose>
+                  </banDynamicVersions>
+                  <dependencyConvergence/>
+                  <reactorModuleConvergence/>
+                  <requireJavaVersion>
+                    <version>[25,)</version>
+                  </requireJavaVersion>
+                  <requireMavenVersion>
+                    <version>[3.9,)</version>
+                  </requireMavenVersion>
+                  <requireReleaseDeps>
+                    <excludes>
+                      <exclude>${project.groupId}:*</exclude>
+                    </excludes>
+                    <onlyWhenRelease>true</onlyWhenRelease>
+                  </requireReleaseDeps>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <executions>
+            <execution>
+              <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${maven-release-plugin.version}</version>
+          <configuration>
+            <autoVersionSubmodules>true</autoVersionSubmodules>
+            <mavenExecutorId>forked-path</mavenExecutorId>
+            <preparationGoals>clean verify</preparationGoals>
+            <projectVersionPolicyId>${releaseType}</projectVersionPolicyId>
+            <scmCommentPrefix>[skip ci] </scmCommentPrefix>
+            <tagNameFormat>v@{project.version}</tagNameFormat>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>prepare-agent</id>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>prepare-agent-it</id>
+              <goals>
+                <goal>prepare-agent-integration</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>report</id>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>report-it</id>
+              <goals>
+                <goal>report-integration</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>com.spotify.fmt</groupId>
+        <artifactId>fmt-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>
