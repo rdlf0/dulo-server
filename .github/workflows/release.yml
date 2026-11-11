@@ -36,13 +36,21 @@ jobs:
     runs-on: ubuntu-26.04
 
     steps:
-      # RELEASE_TOKEN must be allowed to push to the protected main branch
-      # (a GitHub App token or a PAT of a user who can bypass the branch protection).
+      # A short-lived token of the release GitHub App. The app is a bypass actor of the main
+      # ruleset, so it can push the release commits and tag. The token is revoked when the job ends.
+      - name: Create release app token
+        id: app_token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+
       - name: Checkout code
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ steps.app_token.outputs.token }}
 
       - name: Set up JDK 25
         uses: actions/setup-java@v6
@@ -64,35 +72,41 @@ jobs:
             *) echo "Unknown version type: $VERSION_TYPE"; exit 1 ;;
           esac
           echo "Release type: $VERSION_TYPE ($policy)"
-          echo "version_type=$VERSION_TYPE" >> $GITHUB_OUTPUT
-          echo "policy=$policy" >> $GITHUB_OUTPUT
+          echo "version_type=$VERSION_TYPE" >> "$GITHUB_OUTPUT"
+          echo "policy=$policy" >> "$GITHUB_OUTPUT"
 
-      # Signs the release commits and tags. The git user name and email come from the key.
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v7
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_tag_gpgsign: true
+      # Release commits and the tag are authored by the app's bot user, e.g. dulo-release[bot].
+      - name: Set up Git
+        env:
+          APP_SLUG: ${{ steps.app_token.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+        run: |
+          set -euo pipefail
+          bot="${APP_SLUG}[bot]"
+          bot_id=$(gh api "/users/${bot}" --jq .id)
+          git config --local user.name "$bot"
+          git config --local user.email "${bot_id}+${bot}@users.noreply.github.com"
 
-      # Sets the release version, tags it and bumps to the next snapshot version.
-      # Tests already ran on the pull request.
+      # Sets the release version and runs the full build with all tests on it (preparationGoals).
+      # Only when that passes does it commit and tag the release version, commit the next
+      # -SNAPSHOT version and push both commits and the tag. release:perform is not needed: it
+      # would only deploy to a Maven repository, and the release ships as an image and a JAR.
       - name: Prepare release
         id: prepare
+        env:
+          RELEASE_POLICY: ${{ steps.version_type.outputs.policy }}
         run: |
-          ./mvnw -B release:prepare \
-            -DreleaseType=${{ steps.version_type.outputs.policy }} \
-            -Darguments="-DskipTests -Dfmt.skip"
+          ./mvnw -B release:prepare -DreleaseType="$RELEASE_POLICY"
           tag=$(grep '^scm.tag=' release.properties | cut -d= -f2)
-          echo "tag=$tag" >> $GITHUB_OUTPUT
-          echo "version=${tag#v}" >> $GITHUB_OUTPUT
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
 
-      - name: Build release JAR
-        run: |
-          git checkout "${{ steps.prepare.outputs.tag }}"
-          ./mvnw -B -q -pl dulo-service -am package -DskipTests -Dfmt.skip
+      # The working tree is now at the next -SNAPSHOT version. The image is built from the tag.
+      # The release JAR stays in target/ from the build in the previous step.
+      - name: Check out release tag
+        env:
+          TAG: ${{ steps.prepare.outputs.tag }}
+        run: git checkout "$TAG"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -143,19 +157,25 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.prepare.outputs.tag }}
+          VERSION: ${{ steps.prepare.outputs.version }}
         run: |
-          tag="${{ steps.prepare.outputs.tag }}"
-          version="${{ steps.prepare.outputs.version }}"
-          gh release create "$tag" \
+          gh release create "$TAG" \
             --verify-tag \
-            --title "Dulo Server $version" \
+            --title "Dulo Server $VERSION" \
             --generate-notes \
-            "dulo-service/target/dulo-server-$version.jar" \
+            "dulo-service/target/dulo-server-$VERSION.jar" \
             "schema/dulo-config.schema.json"
 
       - name: Print release info
+        env:
+          TAG: ${{ steps.prepare.outputs.tag }}
+          VERSION: ${{ steps.prepare.outputs.version }}
+          VERSION_TYPE: ${{ steps.version_type.outputs.version_type }}
         run: |
-          echo "## Release ${{ steps.prepare.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Type**: ${{ steps.version_type.outputs.version_type }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Image**: \`${{ env.IMAGE }}:${{ steps.prepare.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Release $TAG"
+            echo ""
+            echo "- **Type**: $VERSION_TYPE"
+            echo "- **Image**: \`$IMAGE:$VERSION\`"
+          } >> "$GITHUB_STEP_SUMMARY"

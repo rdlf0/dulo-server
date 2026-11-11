@@ -19,22 +19,38 @@ release can bundle several merged pull requests:
    - `major`: breaking changes
    - `minor`: new features
    - `patch`: bug fixes and internal changes only
-2. `maven-release-plugin` sets the version using the matching policy (`SemVerMajorRelease`,
-   `SemVerMinorRelease` or `SemVerPatchDevelopment`), creates a signed `vX.Y.Z` tag and commits the
-   next `-SNAPSHOT` version. These commits are marked `[skip ci]`.
+2. `maven-release-plugin` (`release:prepare`) sets the version using the matching policy
+   (`SemVerMajorRelease`, `SemVerMinorRelease` or `SemVerPatchDevelopment`) and runs the full build
+   with all tests. If it passes, it commits the release version, tags it `vX.Y.Z`, commits the
+   next `-SNAPSHOT` version and pushes. These commits are marked `[skip ci]`. If the build fails,
+   nothing is committed or pushed.
 3. The Docker image is pushed to `ghcr.io/rdlf0/dulo-server` for amd64 and arm64, tagged
    `X.Y.Z`, `X.Y`, `X` and `latest`.
 4. A GitHub release is created with the JAR and the config JSON Schema attached.
 
 ### Repository setup
 
-- **Branch protection on `main`:** require a pull request, require the `CI` and `Docker image`
-  checks, and block direct pushes.
-- **Secrets used by the Release workflow:**
-  - `RELEASE_TOKEN`: a GitHub App token or personal access token that may push to the protected
-    `main` branch (it pushes the version commit and tag).
-  - `GPG_PRIVATE_KEY`, `GPG_PASSPHRASE` (optional): key that signs release commits and tags. The
-    git author name and email come from the key.
+Release commits and tags are pushed by a GitHub App, so they show up as `<app-name>[bot]`
+and not as a person. The workflow gets a token from the app that expires after one hour.
+
+1. **Create the app:** [New GitHub App](https://github.com/settings/apps/new):
+   - **Name:** e.g. `dulo-release`.
+   - **Homepage URL:** the repository URL.
+   - **Webhook:** uncheck **Active**.
+   - **Repository permissions:** **Contents: Read and write** (Metadata: Read-only is added
+     automatically). Nothing else.
+   - **Where can this GitHub App be installed?** **Only on this account**.
+2. **Generate a private key** on the app's page (**Private keys** → **Generate a private key**),
+   and note the **Client ID** at the top of the page.
+3. **Install the app** (**Install App**) on this repository only.
+4. **Repository secrets and variables** (**Settings** → **Secrets and variables** → **Actions**):
+   - Variable `RELEASE_APP_CLIENT_ID`: the app's Client ID.
+   - Secret `RELEASE_APP_PRIVATE_KEY`: the full contents of the downloaded `.pem` file.
+5. **Ruleset on `main`** (**Settings** → **Rules** → **Rulesets**):
+   - Require a pull request, require the `CI` and `Docker image` checks, block force pushes
+     and deletion.
+   - **Bypass list:** add the app (**Add bypass** → **Apps**) with **Always allow**, so it can
+     push the release commits.
 
 ## Code style
 

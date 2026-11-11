@@ -80,7 +80,7 @@ jobs:
       - name: Smoke test
         run: |
           docker run -d --name dulo -p 8080:8080 dulo-server:ci
-          for i in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             status=$(docker inspect -f '{{.State.Health.Status}}' dulo)
             if [ "$status" = "healthy" ]; then
               echo "✅ Container is healthy"
@@ -94,5 +94,5 @@ jobs:
 
       - name: Print image size
         run: |
-          echo "## Docker image" >> $GITHUB_STEP_SUMMARY
-          docker images dulo-server:ci --format 'Size: {{.Size}}' >> $GITHUB_STEP_SUMMARY
+          echo "## Docker image" >> "$GITHUB_STEP_SUMMARY"
+          docker images dulo-server:ci --format 'Size: {{.Size}}' >> "$GITHUB_STEP_SUMMARY"
