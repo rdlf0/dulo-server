@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Modules keep the URLs below as they are, instead of appending their artifactId. -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
-         child.project.url.inherit.append.path="false">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" child.project.url.inherit.append.path="false">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>4.1.2</version>
-    <relativePath/>
+    <relativePath />
   </parent>
 
   <groupId>com.dulo</groupId>
   <artifactId>dulo-server</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.0</version>
   <packaging>pom</packaging>
 
   <name>Dulo Server</name>
@@ -39,12 +36,10 @@
     </license>
   </licenses>
 
-  <scm child.scm.connection.inherit.append.path="false"
-       child.scm.developerConnection.inherit.append.path="false"
-       child.scm.url.inherit.append.path="false">
+  <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
     <connection>scm:git:https://github.com/rdlf0/dulo-server.git</connection>
     <developerConnection>scm:git:https://github.com/rdlf0/dulo-server.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v0.1.0</tag>
     <url>https://github.com/rdlf0/dulo-server</url>
   </scm>
 
@@ -285,7 +280,7 @@
                     <artifactId>swagger-ui</artifactId>
                     <fileMappers>
                       <!-- Drops the META-INF/resources/webjars/swagger-ui/<version>/ folders. -->
-                      <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper/>
+                      <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper />
                     </fileMappers>
                     <includes>
                       **/favicon-*.png,
@@ -315,15 +310,15 @@
               </goals>
               <configuration>
                 <rules>
-                  <banDuplicatePomDependencyVersions/>
+                  <banDuplicatePomDependencyVersions />
                   <banDynamicVersions>
                     <ignores>
                       <dep>${project.groupId}:*</dep>
                     </ignores>
                     <verbose>true</verbose>
                   </banDynamicVersions>
-                  <dependencyConvergence/>
-                  <reactorModuleConvergence/>
+                  <dependencyConvergence />
+                  <reactorModuleConvergence />
                   <requireJavaVersion>
                     <version>[25,)</version>
                   </requireJavaVersion>
