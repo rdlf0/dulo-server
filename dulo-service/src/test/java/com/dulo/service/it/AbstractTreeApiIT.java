@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -42,6 +44,20 @@ abstract class AbstractTreeApiIT {
 
     @Autowired TreeSettingsRepository trees;
     @Autowired UnitOfWork unitOfWork;
+
+    /**
+     * Points the server at a database container. Call it from each subclass's
+     * {@code @DynamicPropertySource} method.
+     *
+     * @param registry the test's dynamic properties
+     * @param db the database container
+     */
+    static void registerDatabase(
+            final DynamicPropertyRegistry registry, final JdbcDatabaseContainer<?> db) {
+        registry.add("dulo.database.url", db::getJdbcUrl);
+        registry.add("dulo.database.username", db::getUsername);
+        registry.add("dulo.database.password", db::getPassword);
+    }
 
     private static JsonNode feature(final JsonNode tree, final String key) {
         for (final JsonNode feature : tree.path("features")) {
