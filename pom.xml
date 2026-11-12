@@ -12,7 +12,7 @@
 
   <groupId>com.dulo</groupId>
   <artifactId>dulo-server</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Dulo Server</name>
@@ -39,7 +39,7 @@
   <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
     <connection>scm:git:https://github.com/rdlf0/dulo-server.git</connection>
     <developerConnection>scm:git:https://github.com/rdlf0/dulo-server.git</developerConnection>
-    <tag>v0.1.0</tag>
+    <tag>HEAD</tag>
     <url>https://github.com/rdlf0/dulo-server</url>
   </scm>
 
