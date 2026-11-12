@@ -10,6 +10,10 @@
 3. Open a pull request.
 4. Pull requests are squash-merged once checks pass and the PR is approved.
 
+By contributing, you agree that your contributions are licensed under the same terms as the
+project: the [GNU AGPL v3.0 or later](LICENSE) with the [additional permission](LICENSE-EXCEPTION) for
+Liquibase.
+
 ## Versioning and releases
 
 Dulo follows [semantic versioning](https://semver.org). Releases are started by hand, so one
