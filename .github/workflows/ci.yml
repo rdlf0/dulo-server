@@ -33,6 +33,23 @@ jobs:
       - name: Build and test
         run: ./mvnw -B verify
 
+      # Starts the server JAR the way the Docker image of the web client runs it.
+      - name: Smoke test JAR
+        run: |
+          log="$RUNNER_TEMP/server.log"
+          DULO_DATA_DIR="$RUNNER_TEMP/data" java -jar dulo-service/target/dulo-server-*.jar > "$log" 2>&1 &
+          for _ in $(seq 1 60); do
+            if curl -fsS -o /dev/null http://127.0.0.1:8080/actuator/health/liveness; then
+              echo "✅ Server is up"
+              kill %1
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "❌ Server did not start"
+          cat "$log"
+          exit 1
+
       # Unit and integration test coverage of all modules, from dulo-service/target/site/jacoco-aggregate.
       - name: Coverage gate
         env:
@@ -75,44 +92,3 @@ jobs:
       # The build job runs the tests, so they're skipped here.
       - name: Build site
         run: ./mvnw -B -DskipTests package site site:stage
-
-  docker:
-    name: Docker image
-    runs-on: ubuntu-26.04
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Build image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          load: true
-          push: false
-          tags: dulo-server:ci
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Smoke test
-        run: |
-          docker run -d --name dulo -p 8080:8080 dulo-server:ci
-          for _ in $(seq 1 60); do
-            status=$(docker inspect -f '{{.State.Health.Status}}' dulo)
-            if [ "$status" = "healthy" ]; then
-              echo "✅ Container is healthy"
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "❌ Container did not become healthy"
-          docker logs dulo
-          exit 1
-
-      - name: Print image size
-        run: |
-          echo "## Docker image" >> "$GITHUB_STEP_SUMMARY"
-          docker images dulo-server:ci --format 'Size: {{.Size}}' >> "$GITHUB_STEP_SUMMARY"

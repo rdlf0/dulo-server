@@ -4,18 +4,23 @@ Dulo is a self-hosted app for managing family trees. This repository holds the *
 API used by the Dulo web client. Users sign in through an identity provider you already use, such
 as Google, Microsoft or a self-hosted one like Pocket ID.
 
-> **Status:** early development. The foundation (build, configuration, database support, Docker
-> image) is in place; sign-in, the initial setup and family tree features are coming next.
+> **Status:** early development. The foundation (build, configuration, database support) is in
+> place; sign-in, the initial setup and family tree features are coming next.
 
 **Docs:** [rdlf0.github.io/dulo-server](https://rdlf0.github.io/dulo-server/): REST API reference
 (Swagger UI), the OpenAPI document for generating clients, the Javadoc, and test and coverage reports.
 
 ## Quick start
 
-Run the server with a SQLite database stored in a Docker volume:
+Dulo is distributed as one Docker image with the server and the web client, built by the web
+client project. This repository releases the server JAR that the image runs.
+
+To run the server on its own, download the JAR from the
+[latest release](https://github.com/rdlf0/dulo-server/releases/latest) and start it with Java 25.
+It stores a SQLite database in `./data`:
 
 ```sh
-docker run -d --name dulo -p 8080:8080 -v dulo-data:/data ghcr.io/rdlf0/dulo-server:latest
+java -jar dulo-server-X.Y.Z.jar
 ```
 
 Check that it is up:
@@ -27,11 +32,6 @@ curl http://localhost:8080/actuator/health
 On first start, and until the initial setup is done, the server logs its merged configuration.
 Each value shows where it came from (environment variable, config file or default), and secrets
 are masked.
-
-More examples in [`deploy/compose/`](deploy/compose): SQLite, PostgreSQL, and Pocket ID.
-
-Images are published for `linux/amd64` and `linux/arm64`, so they also run on ARM machines such
-as a Raspberry Pi with a 64-bit OS.
 
 ## Configuration
 
@@ -56,7 +56,7 @@ dashes removed:
 
 ### Database
 
-SQLite in the data directory (`/data` in Docker) is the default. For PostgreSQL, MySQL or MariaDB
+SQLite in the data directory (`./data` by default, set with `DULO_DATA_DIR`) is the default. For PostgreSQL, MySQL or MariaDB
 set the JDBC URL and credentials:
 
 ```sh
@@ -81,8 +81,7 @@ Requirements: JDK 25 and Docker (integration tests use Testcontainers).
 ```sh
 ./mvnw verify                                       # format check, unit, architecture and integration tests
 ./mvnw com.spotify.fmt:fmt-maven-plugin:format      # format the code (Google Java Format, AOSP style)
-java -jar dulo-service/target/dulo-server-*.jar   # run locally, data in ./data
-docker build -t dulo-server .                       # build the image
+java -jar dulo-service/target/dulo-server-*.jar     # run locally, data in ./data
 ```
 
 The project follows a hexagonal architecture:
