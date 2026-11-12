@@ -1,0 +1,68 @@
+name: Docs
+
+# Publishes the docs site (Maven site with Swagger UI, the OpenAPI document, Javadoc, test and
+# coverage reports) to GitHub Pages. The Release workflow calls it for each release. Run it by
+# hand from main to republish a tag or branch.
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Tag or branch to publish'
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Tag or branch to publish'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Deployments must not overlap or be canceled halfway.
+concurrency:
+  group: docs
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      # Runs the tests too, so the site shows their results.
+      - name: Build site
+        run: ./mvnw -B verify site site:stage
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: target/staging
+
+  deploy:
+    name: Deploy site
+    needs: build
+    runs-on: ubuntu-26.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v5

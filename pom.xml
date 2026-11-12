@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Modules keep the URLs below as they are, instead of appending their artifactId. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+         child.project.url.inherit.append.path="false">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -28,18 +30,36 @@
     <module>dulo-service</module>
   </modules>
 
-  <scm>
-    <connection>scm:git:https://github.com/rdlf0/dulo-server.git</connection>
-    <developerConnection>scm:git:https://github.com/rdlf0/dulo-server.git</developerConnection>
+  <scm child.scm.connection.inherit.append.path="false"
+       child.scm.developerConnection.inherit.append.path="false"
+       child.scm.url.inherit.append.path="false">
+    <connection>scm:git:git@github.com:rdlf0/dulo-server.git</connection>
+    <developerConnection>scm:git:git@github.com:rdlf0/dulo-server.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://github.com/rdlf0/dulo-server</url>
   </scm>
 
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/rdlf0/dulo-server/issues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>GitHub Actions</system>
+    <url>https://github.com/rdlf0/dulo-server/actions</url>
+  </ciManagement>
+
+  <distributionManagement>
+    <site>
+      <id>github-pages</id>
+      <url>https://rdlf0.github.io/dulo-server/</url>
+    </site>
+  </distributionManagement>
+
   <properties>
     <java.version>25</java.version>
     <maven.compiler.release>${java.version}</maven.compiler.release>
-    <encoding>UTF-8</encoding>
-    <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Version policy for maven-release-plugin. Can be changed by passing -DreleaseType -->
     <releaseType>SemVerMinorRelease</releaseType>
 
@@ -54,6 +74,8 @@
 
     <springdoc.version>3.2.0</springdoc.version>
 
+    <swagger-ui.version>5.34.1</swagger-ui.version>
+
     <victools-jsonschema.version>5.0.0</victools-jsonschema.version>
 
     <!-- Plugin versions -->
@@ -64,11 +86,14 @@
 
     <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
 
-    <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
+    <!-- Skin of the docs site, see src/site/site.xml -->
+    <maven-fluido-skin.version>2.1.0</maven-fluido-skin.version>
 
-    <maven-enforcer-plugin.version>3.7.0</maven-enforcer-plugin.version>
+    <maven-project-info-reports-plugin.version>3.9.0</maven-project-info-reports-plugin.version>
 
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
+
+    <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -118,8 +143,16 @@
       </dependency>
       <dependency>
         <groupId>org.springdoc</groupId>
-        <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+        <artifactId>springdoc-openapi-bom</artifactId>
         <version>${springdoc.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- Not used by any module. The site build unpacks it into the docs site. -->
+      <dependency>
+        <groupId>org.webjars</groupId>
+        <artifactId>swagger-ui</artifactId>
+        <version>${swagger-ui.version}</version>
       </dependency>
 
       <!-- Test dependencies -->
@@ -202,7 +235,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>${maven-dependency-plugin.version}</version>
           <configuration>
             <failOnWarning>true</failOnWarning>
             <ignoreUnusedRuntime>true</ignoreUnusedRuntime>
@@ -229,13 +261,43 @@
                 <goal>analyze-only</goal>
               </goals>
             </execution>
+            <!-- Swagger UI of the docs site, next to the OpenAPI document -->
+            <execution>
+              <id>unpack-swagger-ui</id>
+              <phase>pre-site</phase>
+              <goals>
+                <goal>unpack</goal>
+              </goals>
+              <inherited>false</inherited>
+              <configuration>
+                <artifactItems>
+                  <artifactItem>
+                    <groupId>org.webjars</groupId>
+                    <artifactId>swagger-ui</artifactId>
+                    <fileMappers>
+                      <!-- Drops the META-INF/resources/webjars/swagger-ui/<version>/ folders. -->
+                      <org.codehaus.plexus.components.io.filemappers.FlattenFileMapper/>
+                    </fileMappers>
+                    <includes>
+                      **/favicon-*.png,
+                      **/index.css,
+                      **/swagger-ui-bundle.js,
+                      **/swagger-ui-bundle.js.LICENSE.txt,
+                      **/swagger-ui-standalone-preset.js,
+                      **/swagger-ui-standalone-preset.js.LICENSE.txt,
+                      **/swagger-ui.css
+                    </includes>
+                  </artifactItem>
+                </artifactItems>
+                <outputDirectory>${project.reporting.outputDirectory}/api</outputDirectory>
+              </configuration>
+            </execution>
           </executions>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>${maven-enforcer-plugin.version}</version>
           <executions>
             <execution>
               <id>enforce</id>
@@ -286,6 +348,20 @@
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <doclint>all,-missing</doclint>
+            <doctitle>Dulo Server ${project.version}</doctitle>
+            <failOnWarnings>true</failOnWarnings>
+            <quiet>true</quiet>
+            <!-- Most adapter classes are package-private. Contributors want to see them too. -->
+            <show>package</show>
+            <windowtitle>Dulo Server ${project.version}</windowtitle>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
           <version>${maven-release-plugin.version}</version>
           <configuration>
@@ -296,6 +372,44 @@
             <scmCommentPrefix>[skip ci] </scmCommentPrefix>
             <tagNameFormat>v@{project.version}</tagNameFormat>
           </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <executions>
+            <!-- The checked-in OpenAPI document, shown by the Swagger UI of the docs site -->
+            <execution>
+              <id>copy-openapi-document</id>
+              <phase>pre-site</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <inherited>false</inherited>
+              <configuration>
+                <outputDirectory>${project.reporting.outputDirectory}/api</outputDirectory>
+                <resources>
+                  <resource>
+                    <directory>${project.basedir}/api</directory>
+                  </resource>
+                </resources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>${maven-site-plugin.version}</version>
+          <!-- The skin src/site/site.xml uses. Declared here too, so Dependabot updates it. -->
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.maven.skins</groupId>
+              <artifactId>maven-fluido-skin</artifactId>
+              <version>${maven-fluido-skin.version}</version>
+            </dependency>
+          </dependencies>
         </plugin>
 
         <plugin>
@@ -350,9 +464,86 @@
         <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+      </plugin>
+      <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${maven-javadoc-plugin.version}</version>
+        <inherited>false</inherited>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>aggregate</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>${maven-project-info-reports-plugin.version}</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>ci-management</report>
+              <report>dependencies</report>
+              <report>distribution-management</report>
+              <report>index</report>
+              <report>issue-management</report>
+              <report>modules</report>
+              <report>plugins</report>
+              <report>scm</report>
+              <report>summary</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <!-- Reads the results of the last build, so run the tests first: ./mvnw verify site -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <!-- Released together with Surefire, whose version the Spring Boot parent manages. -->
+        <version>${maven-surefire-plugin.version}</version>
+        <configuration>
+          <linkXRef>false</linkXRef>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>failsafe-report-only</report>
+              <report>report-only</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <!-- Coverage of each module's unit and integration tests, read from the last build. -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.version}</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>report</report>
+              <report>report-integration</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>

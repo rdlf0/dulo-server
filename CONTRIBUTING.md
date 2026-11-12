@@ -26,7 +26,12 @@ release can bundle several merged pull requests:
    nothing is committed or pushed.
 3. The Docker image is pushed to `ghcr.io/rdlf0/dulo-server` for amd64 and arm64, tagged
    `X.Y.Z`, `X.Y`, `X` and `latest`.
-4. A GitHub release is created with the JAR and the config JSON Schema attached.
+4. A GitHub release is created with the JAR, the OpenAPI document and the config JSON Schema
+   attached.
+5. The **Docs** workflow publishes the docs site of the release to GitHub Pages.
+
+CI runs on pull requests only. `main` changes only through pull requests, and a release runs the
+full build again before it publishes anything.
 
 ### Repository setup
 
@@ -47,10 +52,33 @@ and not as a person. The workflow gets a token from the app that expires after o
    - Variable `RELEASE_APP_CLIENT_ID`: the app's Client ID.
    - Secret `RELEASE_APP_PRIVATE_KEY`: the full contents of the downloaded `.pem` file.
 5. **Ruleset on `main`** (**Settings** → **Rules** → **Rulesets**):
-   - Require a pull request, require the `CI` and `Docker image` checks, block force pushes
-     and deletion.
+   - Require a pull request, require the `CI`, `Docs` and `Docker image` checks, block force
+     pushes and deletion.
+   - Turn on **Require branches to be up to date before merging**, so the code that lands on
+     `main` is the code CI tested.
    - **Bypass list:** add the app (**Add bypass** → **Apps**) with **Always allow**, so it can
      push the release commits.
+
+### Docs site
+
+The docs site is the Maven site of the project: Swagger UI with the OpenAPI document, the Javadoc
+of all modules, test and coverage reports, and project information. The **Docs** workflow deploys it to GitHub
+Pages on every release. No branch is involved.
+
+1. Turn on Pages: **Settings** → **Pages** → **Build and deployment** → **Source:** GitHub
+   Actions.
+2. Publish it for the first time: **Actions** → **Docs** → **Run workflow** from `main`, with the
+   latest tag (or `main`) as the ref. Run it the same way to republish. The `github-pages`
+   environment only accepts deployments from `main`, so always start it from `main`.
+
+Build the site locally, then open `target/staging/index.html`:
+
+```sh
+./mvnw verify site site:stage
+```
+
+The site's menu is in `src/site/site.xml`, and the Swagger UI page in `src/site/resources/api/`.
+The build adds the Swagger UI files and `api/openapi.json` next to it.
 
 ## Code style
 
@@ -92,3 +120,15 @@ of date. Regenerate it with:
 ```sh
 ./mvnw -pl dulo-service -am test -Dtest=ConfigSchemaTest -Dsurefire.failIfNoSpecifiedTests=false -Ddulo.schema.update=true
 ```
+
+## OpenAPI document
+
+`api/openapi.json` describes the REST API. Clients generate their code from it, and the docs site
+shows it. A test fails when it is out of date. Regenerate it with:
+
+```sh
+./mvnw -pl dulo-service -am test -Dtest=OpenApiDocumentTest -Dsurefire.failIfNoSpecifiedTests=false -Ddulo.openapi.update=true
+```
+
+Describe each endpoint with the Swagger annotations (`@Tag`, `@Operation`, `@ApiResponse`).
+Response record components are required in the document unless they are `@Nullable`.
