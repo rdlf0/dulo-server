@@ -13,8 +13,6 @@ class PostgresTreeApiIT extends AbstractTreeApiIT {
 
     @DynamicPropertySource
     static void database(final DynamicPropertyRegistry registry) {
-        registry.add("dulo.database.url", DB::getJdbcUrl);
-        registry.add("dulo.database.username", DB::getUsername);
-        registry.add("dulo.database.password", DB::getPassword);
+        registerDatabase(registry, DB);
     }
 }

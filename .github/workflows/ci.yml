@@ -29,7 +29,7 @@ jobs:
           cache: maven
 
       # Format check (validate phase), unit, architecture and integration tests.
-      # Integration tests start PostgreSQL and MySQL with Testcontainers.
+      # Integration tests start PostgreSQL, MySQL and MariaDB with Testcontainers.
       - name: Build and test
         run: ./mvnw -B verify
 
