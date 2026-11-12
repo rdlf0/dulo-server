@@ -100,3 +100,10 @@ The OpenAPI document is checked in at [`api/openapi.json`](api/openapi.json), an
 server also serves it at `/api/v1/openapi.json`.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
+
+## License
+
+Dulo Server is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE),
+with an [additional permission](LICENSE-EXCEPTION) to combine it with Liquibase, whose license
+(FSL-1.1-ALv2) is not compatible with the AGPL on its own. If you run a modified version as a
+service, the AGPL requires you to offer its source code to your users.

@@ -30,6 +30,15 @@
     <module>dulo-service</module>
   </modules>
 
+  <licenses>
+    <license>
+      <name>GNU Affero General Public License v3.0 or later</name>
+      <url>https://www.gnu.org/licenses/agpl-3.0.html</url>
+      <distribution>repo</distribution>
+      <comments>With an additional permission for Liquibase, see LICENSE-EXCEPTION.</comments>
+    </license>
+  </licenses>
+
   <scm child.scm.connection.inherit.append.path="false"
        child.scm.developerConnection.inherit.append.path="false"
        child.scm.url.inherit.append.path="false">
@@ -502,6 +511,7 @@
               <report>distribution-management</report>
               <report>index</report>
               <report>issue-management</report>
+              <report>licenses</report>
               <report>modules</report>
               <report>plugins</report>
               <report>scm</report>
