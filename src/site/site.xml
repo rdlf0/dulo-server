@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site xmlns="http://maven.apache.org/SITE/2.0.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/SITE/2.0.0 https://maven.apache.org/xsd/site-2.0.0.xsd">
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>${maven-fluido-skin.version}</version>
+  </skin>
+
+  <body>
+    <menu name="Documentation" inherit="top">
+      <item name="REST API (Swagger UI)" href="api/index.html"/>
+      <item name="OpenAPI document" href="api/openapi.json"/>
+      <item name="Javadoc" href="apidocs/index.html"/>
+      <item name="Test coverage" href="dulo-service/jacoco-aggregate/index.html"/>
+    </menu>
+    <menu ref="modules" inherit="top"/>
+    <menu ref="reports" inherit="bottom"/>
+  </body>
+</site>

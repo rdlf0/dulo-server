@@ -1,9 +1,9 @@
 name: CI
 
+# Pull requests only: main changes only through pull requests, and the Release workflow runs
+# the full build again before it releases.
 on:
   pull_request:
-  push:
-    branches: [main]
 
 permissions:
   contents: read
@@ -55,6 +55,26 @@ jobs:
           name: test-reports
           path: '**/target/*-reports/'
           retention-days: 14
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      # Fails on Javadoc errors and warnings, so the docs published on release always build.
+      # The build job runs the tests, so they're skipped here.
+      - name: Build site
+        run: ./mvnw -B -DskipTests package site site:stage
 
   docker:
     name: Docker image

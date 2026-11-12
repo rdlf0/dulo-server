@@ -4,6 +4,8 @@
 .idea/
 .vscode/
 *.iml
+api/
 data/
 deploy/
 schema/
+src/

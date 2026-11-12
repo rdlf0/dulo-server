@@ -7,6 +7,9 @@ as Google, Microsoft or a self-hosted one like Pocket ID.
 > **Status:** early development. The foundation (build, configuration, database support, Docker
 > image) is in place; sign-in, the initial setup and family tree features are coming next.
 
+**Docs:** [rdlf0.github.io/dulo-server](https://rdlf0.github.io/dulo-server/): REST API reference
+(Swagger UI), the OpenAPI document for generating clients, the Javadoc, and test and coverage reports.
+
 ## Quick start
 
 Run the server with a SQLite database stored in a Docker volume:
@@ -94,6 +97,7 @@ The project follows a hexagonal architecture:
 
 Architecture rules are checked by ArchUnit tests in `dulo-service`.
 
-The API description is served at `/api/v1/openapi.json`.
+The OpenAPI document is checked in at [`api/openapi.json`](api/openapi.json), and a running
+server also serves it at `/api/v1/openapi.json`.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.

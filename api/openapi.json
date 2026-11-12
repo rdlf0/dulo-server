@@ -1,0 +1,134 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "description" : "REST API of the Dulo family tree server.",
+    "title" : "Dulo API",
+    "version" : "1"
+  },
+  "servers" : [ {
+    "url" : "{baseUrl}",
+    "description" : "Dulo server",
+    "variables" : {
+      "baseUrl" : {
+        "description" : "Address of your Dulo server",
+        "default" : "http://localhost:8080"
+      }
+    }
+  } ],
+  "tags" : [ {
+    "description" : "The family tree of this server",
+    "name" : "Tree"
+  } ],
+  "paths" : {
+    "/api/v1/tree" : {
+      "get" : {
+        "description" : "Returns the tree's name, description and the state of each feature.",
+        "operationId" : "getTree",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TreeResponse"
+                }
+              }
+            },
+            "description" : "The tree",
+            "headers" : {
+              "ETag" : {
+                "description" : "Version of the tree",
+                "schema" : {
+                  "type" : "string"
+                },
+                "style" : "simple"
+              }
+            }
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "The initial setup is not done yet. The problem type is `urn:dulo:problem:tree-not-initialized`."
+          }
+        },
+        "summary" : "Get the family tree",
+        "tags" : [ "Tree" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "FeatureResponse" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "locked" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "enabled", "key", "locked" ]
+      },
+      "ProblemDetail" : {
+        "type" : "object",
+        "properties" : {
+          "detail" : {
+            "type" : [ "string", "null" ]
+          },
+          "instance" : {
+            "type" : [ "string", "null" ],
+            "format" : "uri"
+          },
+          "properties" : {
+            "type" : [ "object", "null" ],
+            "additionalProperties" : { }
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "title" : {
+            "type" : [ "string", "null" ]
+          },
+          "type" : {
+            "type" : [ "string", "null" ],
+            "format" : "uri"
+          }
+        }
+      },
+      "TreeResponse" : {
+        "type" : "object",
+        "properties" : {
+          "description" : {
+            "type" : [ "string", "null" ]
+          },
+          "features" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FeatureResponse"
+            }
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "features", "id", "name", "version" ]
+      }
+    }
+  }
+}

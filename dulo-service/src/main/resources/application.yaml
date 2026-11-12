@@ -41,6 +41,13 @@ management:
 springdoc:
   api-docs:
     path: /api/v1/openapi.json
+  default-produces-media-type: application/json
+  model-converters:
+    # Marks @Nullable properties as nullable.
+    java-nullable-property-customizer:
+      enabled: true
+  # Stable key order, so the checked-in api/openapi.json only changes when the API does.
+  writer-with-order-by-keys: true
 
 dulo:
   data-dir: ./data

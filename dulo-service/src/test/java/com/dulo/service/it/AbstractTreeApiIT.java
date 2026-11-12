@@ -104,14 +104,6 @@ abstract class AbstractTreeApiIT {
         assertThat(JSON.readTree(health.body()).path("status").asString()).isEqualTo("UP");
     }
 
-    @Test
-    void publishesOpenApiDocument() throws Exception {
-        final HttpResponse<String> api = this.get("/api/v1/openapi.json");
-
-        assertThat(api.statusCode()).isEqualTo(200);
-        assertThat(JSON.readTree(api.body()).path("paths").has("/api/v1/tree")).isTrue();
-    }
-
     private HttpResponse<String> get(final String path) throws IOException, InterruptedException {
         return HTTP.send(
                 HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)).build(),

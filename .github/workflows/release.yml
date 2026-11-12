@@ -34,6 +34,8 @@ jobs:
     # Releases are cut from main only.
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-26.04
+    outputs:
+      tag: ${{ steps.prepare.outputs.tag }}
 
     steps:
       # A short-lived token of the release GitHub App. The app is a bypass actor of the main
@@ -165,6 +167,7 @@ jobs:
             --title "Dulo Server $VERSION" \
             --generate-notes \
             "dulo-service/target/dulo-server-$VERSION.jar" \
+            "api/openapi.json" \
             "schema/dulo-config.schema.json"
 
       - name: Print release info
@@ -179,3 +182,14 @@ jobs:
             echo "- **Type**: $VERSION_TYPE"
             echo "- **Image**: \`$IMAGE:$VERSION\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  docs:
+    name: Docs
+    needs: release
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/docs.yml
+    with:
+      ref: ${{ needs.release.outputs.tag }}
