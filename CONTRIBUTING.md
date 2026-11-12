@@ -24,14 +24,24 @@ release can bundle several merged pull requests:
    with all tests. If it passes, it commits the release version, tags it `vX.Y.Z`, commits the
    next `-SNAPSHOT` version and pushes. These commits are marked `[skip ci]`. If the build fails,
    nothing is committed or pushed.
-3. The Docker image is pushed to `ghcr.io/rdlf0/dulo-server` for amd64 and arm64, tagged
-   `X.Y.Z`, `X.Y`, `X` and `latest`.
-4. A GitHub release is created with the JAR, the OpenAPI document and the config JSON Schema
-   attached.
-5. The **Docs** workflow publishes the docs site of the release to GitHub Pages.
+3. A GitHub release is created with the JAR, the OpenAPI document and the config JSON Schema
+   attached. The JAR gets a build provenance attestation.
+4. The **Docs** workflow publishes the docs site of the release to GitHub Pages.
 
 CI runs on pull requests only. `main` changes only through pull requests, and a release runs the
 full build again before it publishes anything.
+
+### Distribution
+
+Dulo ships as one image with the server and the web client, built by the web client project. 
+That build downloads the server JAR from a GitHub release and checks where it came from:
+
+```sh
+gh release download vX.Y.Z --repo rdlf0/dulo-server --pattern 'dulo-server-*.jar'
+gh attestation verify dulo-server-X.Y.Z.jar --repo rdlf0/dulo-server
+```
+
+The JAR runs with `java -jar` on Java 25. It needs no extra JVM options.
 
 ### Repository setup
 
@@ -52,7 +62,7 @@ and not as a person. The workflow gets a token from the app that expires after o
    - Variable `RELEASE_APP_CLIENT_ID`: the app's Client ID.
    - Secret `RELEASE_APP_PRIVATE_KEY`: the full contents of the downloaded `.pem` file.
 5. **Ruleset on `main`** (**Settings** → **Rules** → **Rulesets**):
-   - Require a pull request, require the `CI`, `Docs` and `Docker image` checks, block force
+   - Require a pull request, require the `CI` and `Docs` checks, block force
      pushes and deletion.
    - Turn on **Require branches to be up to date before merging**, so the code that lands on
      `main` is the code CI tested.
@@ -67,8 +77,8 @@ Pages on every release. No branch is involved.
 
 1. Turn on Pages: **Settings** → **Pages** → **Build and deployment** → **Source:** GitHub
    Actions.
-2. Publish it for the first time: **Actions** → **Docs** → **Run workflow** from `main`, with the
-   latest tag (or `main`) as the ref. Run it the same way to republish. The `github-pages`
+2. Every release publishes the site. To publish or republish it in between: **Actions** →
+   **Docs** → **Run workflow** from `main`, with a tag or `main` as the ref. The `github-pages`
    environment only accepts deployments from `main`, so always start it from `main`.
 
 Build the site locally, then open `target/staging/index.html`:

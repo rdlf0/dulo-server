@@ -163,6 +163,19 @@
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifestEntries>
+                <!-- SQLite loads a native library. Saves passing the enable-native-access option. -->
+                <Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
+              </manifestEntries>
+            </archive>
+          </configuration>
+        </plugin>
+
+        <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <executions>
