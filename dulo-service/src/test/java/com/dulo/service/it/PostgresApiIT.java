@@ -7,7 +7,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 @Testcontainers
-class PostgresTreeApiIT extends AbstractTreeApiIT {
+class PostgresApiIT extends AbstractApiIT {
 
     @Container static final PostgreSQLContainer DB = new PostgreSQLContainer("postgres:18-alpine");
 

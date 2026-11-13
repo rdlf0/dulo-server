@@ -6,7 +6,7 @@ import org.springframework.test.context.DynamicPropertySource;
 
 import java.nio.file.Path;
 
-class SqliteTreeApiIT extends AbstractTreeApiIT {
+class SqliteApiIT extends AbstractApiIT {
 
     @TempDir static Path dataDir;
 

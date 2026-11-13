@@ -1,5 +1,6 @@
 package com.dulo.service.config;
 
+import com.dulo.core.identity.port.out.IdentityProvidersPort;
 import com.dulo.core.tree.port.in.GetTreeUseCase;
 import com.dulo.core.tree.port.out.FeatureOverridesPort;
 
@@ -16,6 +17,11 @@ public class ConfigurationConfiguration {
     FeatureOverridesPort featureOverridesPort(final DuloProperties properties) {
         final var overrides = properties.featureOverrides();
         return () -> overrides;
+    }
+
+    @Bean
+    IdentityProvidersPort identityProvidersPort(final DuloProperties properties) {
+        return new ConfiguredIdentityProviders(properties);
     }
 
     @Bean

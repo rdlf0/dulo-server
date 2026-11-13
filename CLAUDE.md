@@ -24,7 +24,7 @@ fails a build with `-pl` alone:
 
 # Integration test (*IT, run by Failsafe). PostgreSQL, MySQL and MariaDB ITs use Testcontainers.
 ./mvnw -pl dulo-service -am verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=false \
-  -Dit.test=SqliteTreeApiIT -Dfailsafe.failIfNoSpecifiedTests=false
+  -Dit.test=SqliteApiIT -Dfailsafe.failIfNoSpecifiedTests=false
 ```
 
 The build also runs `maven-dependency-plugin:analyze-only` with `failOnWarning`, so every directly

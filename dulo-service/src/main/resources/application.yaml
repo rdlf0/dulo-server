@@ -13,6 +13,10 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: none
+    properties:
+      # Instants are stored as UTC in plain timestamp columns, which every supported database has.
+      hibernate.jdbc.time_zone: UTC
+      hibernate.type.preferred_instant_jdbc_type: TIMESTAMP
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
   mvc:
