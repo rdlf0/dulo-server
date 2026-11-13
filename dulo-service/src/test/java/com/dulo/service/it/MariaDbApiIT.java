@@ -4,12 +4,12 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.mysql.MySQLContainer;
+import org.testcontainers.mariadb.MariaDBContainer;
 
 @Testcontainers
-class MySqlTreeApiIT extends AbstractTreeApiIT {
+class MariaDbApiIT extends AbstractApiIT {
 
-    @Container static final MySQLContainer DB = new MySQLContainer("mysql:9.7");
+    @Container static final MariaDBContainer DB = new MariaDBContainer("mariadb:12.3");
 
     @DynamicPropertySource
     static void database(final DynamicPropertyRegistry registry) {

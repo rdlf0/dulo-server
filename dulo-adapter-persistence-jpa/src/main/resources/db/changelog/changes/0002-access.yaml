@@ -1,0 +1,161 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0002-access
+      author: dulo
+      changes:
+        - createTable:
+            tableName: dulo_user
+            columns:
+              - column:
+                  name: id
+                  type: varchar(36)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_dulo_user
+                    nullable: false
+              - column:
+                  name: provider_id
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: external_subject
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(320)
+              - column:
+                  name: display_name
+                  type: varchar(200)
+              - column:
+                  name: status
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_root
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_sign_in
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: bigint
+                  constraints:
+                    nullable: false
+        # A unique index, not a constraint: SQLite cannot add constraints to existing tables.
+        - createIndex:
+            tableName: dulo_user
+            indexName: ux_dulo_user_external_identity
+            unique: true
+            columns:
+              - column:
+                  name: provider_id
+              - column:
+                  name: external_subject
+        # Role keys are not foreign keys: claim mappings may name roles that do not exist (yet).
+        - createTable:
+            tableName: user_role
+            columns:
+              - column:
+                  name: user_id
+                  type: varchar(36)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_user_role
+                    nullable: false
+                    foreignKeyName: fk_user_role_user
+                    references: dulo_user(id)
+                    deleteCascade: true
+              - column:
+                  name: role_key
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_user_role
+                    nullable: false
+              - column:
+                  name: source
+                  type: varchar(10)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_user_role
+                    nullable: false
+        - createTable:
+            tableName: dulo_role
+            columns:
+              - column:
+                  name: role_key
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_dulo_role
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: built_in
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: role_permission
+            columns:
+              - column:
+                  name: role_key
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_role_permission
+                    nullable: false
+                    foreignKeyName: fk_role_permission_role
+                    references: dulo_role(role_key)
+                    deleteCascade: true
+              - column:
+                  name: feature
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_role_permission
+                    nullable: false
+              - column:
+                  name: access
+                  type: varchar(20)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_role_permission
+                    nullable: false
+        - createTable:
+            tableName: signing_key
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_signing_key
+                    nullable: false
+              - column:
+                  name: material
+                  type: clob
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime
+                  constraints:
+                    nullable: false

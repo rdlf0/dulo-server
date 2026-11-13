@@ -45,6 +45,8 @@ class SqliteDataSourceCustomizer implements BeanPostProcessor {
             hikari.addDataSourceProperty("foreign_keys", "true");
             hikari.addDataSourceProperty("journal_mode", "WAL");
             hikari.addDataSourceProperty("busy_timeout", "5000");
+            // Liquibase creates SQLite datetime columns as TEXT, so timestamps are stored as text.
+            hikari.addDataSourceProperty("date_class", "TEXT");
         }
         return bean;
     }
